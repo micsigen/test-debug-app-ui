@@ -1,19 +1,19 @@
 package com.example.demo.ui;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.io.IOException;
 
+import com.example.demo.data.Account;
+import com.example.demo.data.AccountService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.BeanValidationBinder;
-import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.Route;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This is the default (and only) view in this example.
@@ -24,10 +24,22 @@ import com.vaadin.flow.router.Route;
 @Route("")
 public class MainView extends VerticalLayout {
 
+    private static final long serialVersionUID = 198215057715461036L;
+
+    private final TextField idField;
+
+    private final TextField nameField;
+
+    private final TextField balanceField;
+
+    private final TextField incrementField;
+
+    private final TextField withdrawField;
+
     /**
      * We use Spring to inject the backend into our view
      */
-    public MainView() {
+    public MainView(@Autowired AccountService accountService) {
 
         /*
          * Create the components we'll need
@@ -35,26 +47,26 @@ public class MainView extends VerticalLayout {
 
         H3 title = new H3("Bank account");
 
-        TextField idField = new TextField("Identifier of customer");
-        
+        idField = new TextField("Identifier of customer");
+
         Button queryButton = new Button("Query Account by Id");
         queryButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         Span errorMessage = new Span();
 
-        TextField nameField = new TextField("Name");
+        nameField = new TextField("Name");
         nameField.setReadOnly(true);
-        TextField balanceField = new TextField("Balance");
+        balanceField = new TextField("Balance");
         balanceField.setReadOnly(true);
-        
-        TextField incrementField = new TextField("Increment");
+
+        incrementField = new TextField("Increment");
         Button incrementButton = new Button("Increment");
 
-        TextField withdrawField = new TextField("Withdraw");
+        withdrawField = new TextField("Withdraw");
         Button withdrawButton = new Button("Withdraw");
 
-        FormLayout formLayout = new FormLayout(title, idField, queryButton, nameField,
-                balanceField, incrementField, incrementButton, withdrawField, withdrawButton, errorMessage);
+        FormLayout formLayout = new FormLayout(title, idField, queryButton, nameField, balanceField, incrementField,
+                incrementButton, withdrawField, withdrawButton, errorMessage);
 
         // Restrict maximum width and center on page
         formLayout.setMaxWidth("500px");
@@ -62,7 +74,8 @@ public class MainView extends VerticalLayout {
 
         // Allow the form layout to be responsive. On device widths 0-490px we have one
         // column, then we have two. Field labels are always on top of the fields.
-        formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1, FormLayout.ResponsiveStep.LabelsPosition.TOP),
+        formLayout.setResponsiveSteps(
+                new FormLayout.ResponsiveStep("0", 1, FormLayout.ResponsiveStep.LabelsPosition.TOP),
                 new FormLayout.ResponsiveStep("490px", 2, FormLayout.ResponsiveStep.LabelsPosition.TOP));
 
         // These components take full width regardless if we use one column or two (it
@@ -70,6 +83,7 @@ public class MainView extends VerticalLayout {
         formLayout.setColspan(title, 2);
         formLayout.setColspan(idField, 2);
         formLayout.setColspan(queryButton, 2);
+        formLayout.setColspan(errorMessage, 2);
 
         // Add some styles to the error message to make it pop out
         errorMessage.getStyle().set("color", "var(--lumo-error-text-color)");
@@ -83,8 +97,33 @@ public class MainView extends VerticalLayout {
          */
 
         // And finally the submit button
-        queryButton.addClickListener(e -> {}
-        );
+        queryButton.addClickListener(e -> {
+            try {
+                Account account = accountService.query(idField.getValue());
+                nameField.setValue(account.getName().toString());
+                balanceField.setValue(account.getBalance().toString());
+            } catch (IOException e1) {
+                errorMessage.add(e1.toString());
+            }
+        });
+
+        incrementButton.addClickListener(e -> {
+            try {
+                Account account = accountService.increment(idField.getValue(), new Double(incrementField.getValue()));
+                balanceField.setValue(account.getBalance().toString());
+            } catch (IOException e2) {
+                errorMessage.add(e2.getLocalizedMessage());
+            }
+        });
+
+        withdrawButton.addClickListener(e -> {
+            try {
+                Account account = accountService.withdraw(idField.getValue(), new Double(withdrawField.getValue()));
+                balanceField.setValue(account.getBalance().toString());
+            } catch (IOException e3) {
+                errorMessage.add(e3.getLocalizedMessage());
+            }
+        });
 
     }
 }
