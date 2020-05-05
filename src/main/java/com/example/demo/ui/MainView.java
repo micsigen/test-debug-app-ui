@@ -1,9 +1,6 @@
 package com.example.demo.ui;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import com.example.demo.data.UserDetails;
-import com.example.demo.data.UserDetailsService;
-import com.example.demo.data.UserDetailsService.ServiceException;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -27,15 +24,10 @@ import com.vaadin.flow.router.Route;
 @Route("")
 public class MainView extends VerticalLayout {
 
-    private UserDetailsService service;
-    private BeanValidationBinder<UserDetails> binder;
-
     /**
      * We use Spring to inject the backend into our view
      */
-    public MainView(@Autowired UserDetailsService service) {
-
-        this.service = service;
+    public MainView() {
 
         /*
          * Create the components we'll need
@@ -90,63 +82,9 @@ public class MainView extends VerticalLayout {
          * Set up form functionality
          */
 
-        /*
-         * Binder is a form utility class provided by Vaadin. Here, we use a specialized
-         * version to gain access to automatic Bean Validation (JSR-303). We provide our
-         * data class so that the Binder can read the validation definitions on that
-         * class and create appropriate validators. The BeanValidationBinder can
-         * automatically validate all JSR-303 definitions, meaning we can concentrate on
-         * custom things such as the passwords in this class.
-         */
-        binder = new BeanValidationBinder<UserDetails>(UserDetails.class);
-
-        // Basic name fields that are required to fill in
-        binder.forField(idField).asRequired().bind("id");
-
         // And finally the submit button
-        queryButton.addClickListener(e -> {
-            try {
+        queryButton.addClickListener(e -> {}
+        );
 
-                // Create empty bean to store the details into
-                UserDetails detailsBean = new UserDetails();
-
-                // Run validators and write the values to the bean
-                binder.writeBean(detailsBean);
-
-                // Call backend to store the data
-                service.store(detailsBean);
-
-                // Show success message if everything went well
-                showSuccess(detailsBean);
-
-            } catch (ValidationException e1) {
-                // validation errors are already visible for each field,
-                // and bean-level errors are shown in the status label.
-
-                // We could show additional messages here if we want, do logging, etc.
-
-            } catch (ServiceException e2) {
-
-                // For some reason, the save failed in the back end.
-
-                // First, make sure we store the error in the server logs (preferably using a
-                // logging framework)
-                e2.printStackTrace();
-
-                // Notify, and let the user try again.
-                errorMessage.setText("Saving the data failed, please try again");
-            }
-        });
-
-    }
-
-    /**
-     * We call this method when form submission has succeeded
-     */
-    private void showSuccess(UserDetails detailsBean) {
-        Notification notification = Notification.show("Data saved, welcome " + detailsBean.getHandle());
-        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-
-        // Here you'd typically redirect the user to another view
     }
 }
