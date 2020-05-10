@@ -3,7 +3,6 @@ package com.example.demo.data;
 import java.io.IOException;
 import java.io.Serializable;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,8 +13,6 @@ import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
 import org.springframework.stereotype.Service;
-
-import elemental.json.JsonObject;
 
 @Service
 public class AccountService implements Serializable {
