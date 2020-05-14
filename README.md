@@ -1,5 +1,5 @@
 # test-debug-app-ui
-UI for bank account application. !https://github.com/micsigen/test-debug-app
+UI for bank account application. https://github.com/micsigen/test-debug-app
 
 ## Running the Application
 
